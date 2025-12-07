@@ -140,3 +140,38 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Local .terraform directories
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+
+# Exclude all tfvars but keep env-specific example files
+!envs/**/example.tfvars
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Lock file (optional — recommended to commit for provider version pinning)
+# .terraform.lock.hcl
+
+# IDE/Editor files
+*.swp
+*.bak
+*.tmp
+*.log
+.DS_Store
+
+# VSCode
+.vscode/
