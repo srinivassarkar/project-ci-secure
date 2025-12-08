@@ -1,0 +1,36 @@
+# Node modules from host (always build inside container)
+node_modules
+
+# Test files and coverage
+src/__tests__/
+coverage/
+*.lcov
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor/project settings
+.vscode/
+.idea/
+*.swp
+
+# OS/temporary files
+.DS_Store
+Thumbs.db
+.tmp/
+temp/
+
+# Build outputs (if ever used)
+build/
+dist/
+
+# Dockerfile and README are needed, don't ignore
