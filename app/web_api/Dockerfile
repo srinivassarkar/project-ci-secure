@@ -4,14 +4,11 @@
 FROM node:22-alpine AS builder
 
 WORKDIR /app
+# Ensure package-lock.json is present for deterministic builds!
 
-# Copy only dependency manifests to leverage caching
 COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
 
-# Install dependencies with a clean reproducible env
-RUN npm ci && npm cache clean --force
-
-# Copy application code
 COPY src ./src
 
 # ============================================
@@ -24,25 +21,18 @@ WORKDIR /app
 # Install minimal process supervisor
 RUN apk add --no-cache dumb-init
 
-# ---- SECURITY & SIZE OPTIMIZATION ----
-# 1. Remove npm completely (removes vulnerable glob dependency)
-# 2. Delete caches + temp data
+# Remove npm (security/hardening)
 RUN rm -rf /usr/local/lib/node_modules/npm \
     && rm -f /usr/local/bin/npm \
     && rm -f /usr/local/bin/npx \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 -G nodejs
 
-# Bring production node_modules
+# Copy in files (owned by non-root user)
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-
-# Copy package metadata
-COPY --chown=nodejs:nodejs package*.json ./
-
-# Copy source code
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/src ./src
 
 USER nodejs
