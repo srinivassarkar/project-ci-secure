@@ -1,53 +1,56 @@
 # ============================================
-# Builder stage - Install dependencies
+# Builder stage
 # ============================================
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy only package files first (maximize cache usage)
+# Copy only dependency manifests to leverage caching
 COPY package*.json ./
 
-# Install production dependencies only
-RUN npm ci --only=production && \
-    npm cache clean --force
+# Install dependencies with a clean reproducible env
+RUN npm ci && npm cache clean --force
+
+# Copy application code
+COPY src ./src
 
 # ============================================
-# Production stage - Minimal runtime image
+# Production runtime
 # ============================================
-FROM node:18-alpine
+FROM node:22-alpine
 
-# Install only required system tools, then cleanup in same layer
-RUN apk add --no-cache dumb-init && \
-    rm -rf /var/cache/apk/*
+WORKDIR /app
 
-# Create non-root user and group
+# Install minimal process supervisor
+RUN apk add --no-cache dumb-init
+
+# ---- SECURITY & SIZE OPTIMIZATION ----
+# 1. Remove npm completely (removes vulnerable glob dependency)
+# 2. Delete caches + temp data
+RUN rm -rf /usr/local/lib/node_modules/npm \
+    && rm -f /usr/local/bin/npm \
+    && rm -f /usr/local/bin/npx \
+    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
+
+# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 -G nodejs
 
-WORKDIR /app
-
-# Copy node_modules from builder (fewer layers)
+# Bring production node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
-# Copy package files (needed for npm metadata)
+# Copy package metadata
 COPY --chown=nodejs:nodejs package*.json ./
 
-# Copy source code last (changes most frequently)
-COPY --chown=nodejs:nodejs src ./src
+# Copy source code
+COPY --from=builder --chown=nodejs:nodejs /app/src ./src
 
-# Switch to non-root user
 USER nodejs
 
-# Expose application port
 EXPOSE 8080
 
-# Health check for container orchestration
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:8080/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:8080/health', r => process.exit(r.statusCode===200?0:1))"
 
-# Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start application
 CMD ["node", "src/server.js"]
