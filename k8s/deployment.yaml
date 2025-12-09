@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: color-palette
+  namespace: color-palette
+  labels:
+    app: color-palette
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: color-palette
+  template:
+    metadata:
+      labels:
+        app: color-palette
+        version: ${APP_VERSION:-v1}
+    spec:
+      containers:
+      - name: app
+        image: <YOUR_ECR_REPO>:latest
+        env:
+        - name: APP_VERSION
+          value: "v1"  # Change to v2 for canary
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+          requests:
+            cpu: "200m"
+            memory: "128Mi"
