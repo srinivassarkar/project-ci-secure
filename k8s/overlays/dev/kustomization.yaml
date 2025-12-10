@@ -1,0 +1,7 @@
+namespace: color-palette
+
+resources:
+  - ../../base
+
+patches:
+  - path: image-patch.yaml

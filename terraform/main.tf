@@ -45,7 +45,7 @@ resource "aws_security_group" "vpc_endpoints" {
 
 # VPC Endpoints Submodule
 module "vpc_endpoints" {
-  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
+  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints" 
   version = "6.5.1"
 
   vpc_id             = module.vpc.vpc_id
@@ -158,7 +158,7 @@ resource "aws_iam_role" "gh_actions" {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:srinivassarkar/project-ci-secure:*"
+          "token.actions.githubusercontent.com:sub" = "repo:srinivassarkar/project-ci-secure:*" #"repo:srinivassarkar/project-ci-secure:ref:refs/heads/main"
         }
       }
     }]

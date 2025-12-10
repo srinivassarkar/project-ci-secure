@@ -4,7 +4,7 @@ metadata:
   name: color-palette
   namespace: color-palette
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: color-palette
   ports:
