@@ -105,7 +105,7 @@ module "eks" {
 
 # ECR Repository (encrypted + lifecycle)
 resource "aws_ecr_repository" "app" {
-  name                 = "secure-demo-app"
+  name                 = "${var.cluster_name}"
   image_tag_mutability = "IMMUTABLE"
 
   encryption_configuration {
