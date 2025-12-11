@@ -16,28 +16,28 @@ spec:
         app: color-palette
     spec:
       containers:
-      - name: app
-        image: color-palette:latest   # patched in overlay
-        imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-            name: color-config
-        - secretRef:
-            name: app-secrets
-        ports:
-        - containerPort: 8080
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-        resources:
-          limits:
-            cpu: "500m"
-            memory: "256Mi"
-          requests:
-            cpu: "200m"
-            memory: "128Mi"
+        - name: app
+          image: REPLACED_BY_KUSTOMIZE
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: color-config
+            - secretRef:
+                name: app-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+            requests:
+              cpu: "200m"
+              memory: "128Mi"

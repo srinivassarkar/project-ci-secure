@@ -5,4 +5,12 @@ resources:
   - ingress.yaml
   - hpa.yaml
   - configmap.yaml
-  - externalsecret.yaml
+#  - externalsecret.yaml
+
+images:
+  - name: REPLACED_BY_KUSTOMIZE
+    newName: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/eks-ci-secure
+    newTag: latest
+
+
+    
