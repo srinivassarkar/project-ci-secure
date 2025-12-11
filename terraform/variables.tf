@@ -1,5 +1,5 @@
 variable "cluster_name" {
-  default = "eks-secure-demo"
+  default = "eks-ci-secure"
 }
 
 variable "region" {
