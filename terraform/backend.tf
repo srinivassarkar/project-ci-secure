@@ -4,6 +4,6 @@ terraform {
     key          = "prod/eks-cluster.tfstate"
     region       = "us-east-1"
     encrypt      = true
-    use_lockfile = true   
+    use_lockfile = true
   }
 }

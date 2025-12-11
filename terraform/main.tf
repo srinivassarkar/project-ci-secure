@@ -45,11 +45,11 @@ resource "aws_security_group" "vpc_endpoints" {
 
 # VPC Endpoints Submodule
 module "vpc_endpoints" {
-  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints" 
+  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
   version = "6.5.1"
 
   vpc_id             = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  subnet_ids         = module.vpc.private_subnets
   security_group_ids = [aws_security_group.vpc_endpoints.id]
 
   endpoints = {
@@ -65,6 +65,9 @@ module "vpc_endpoints" {
 
     ecr_dkr = {
       service = "ecr.dkr"
+    }
+    sts = {
+      service = "sts"
     }
   }
 }
@@ -186,6 +189,24 @@ resource "aws_iam_role_policy" "ecr_push" {
           "ecr:UploadLayerPart"
         ]
         Resource = aws_ecr_repository.app.arn
+      }
+    ]
+  })
+}
+
+# Extra permissions: GitHub Actions can DescribeCluster + generate kubeconfig
+resource "aws_iam_role_policy" "eks_deploy" {
+  role = aws_iam_role.gh_actions.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "eks:DescribeCluster",
+          "eks:ListClusters"
+        ]
+        Resource = "*"
       }
     ]
   })

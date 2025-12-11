@@ -11,7 +11,7 @@ output "ecr_repository_url" {
 }
 
 output "github_actions_role_arn" {
-  value = aws_iam_role.gh_actions.arn
+  value       = aws_iam_role.gh_actions.arn
   description = "Put this ARN in GitHub Secrets as AWS_ROLE_TO_ASSUME"
 }
 
