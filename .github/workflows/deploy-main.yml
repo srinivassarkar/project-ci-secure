@@ -50,6 +50,16 @@ jobs:
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      - name: Deploy Manifests
+      # - name: Deploy Manifests
+      #   run: |
+      #     kubectl apply -f k8s/
+      - name: Update overlay image
         run: |
-          kubectl apply -f k8s/
+          ECR_URI=123456789012.dkr.ecr.us-east-1.amazonaws.com/eks-ci-secure
+          sed -i "s#<YOUR_ECR_REPO>#${ECR_URI}#g" k8s/gitops/overlays/v1/patch.yaml
+          sed -i "s#v1#${{ github.sha }}#g" k8s/gitops/overlays/v1/patch.yaml
+          git add k8s/gitops/overlays/v1/patch.yaml
+          git commit -m "Update image to ${{ github.sha }}"
+          git push
+
+
