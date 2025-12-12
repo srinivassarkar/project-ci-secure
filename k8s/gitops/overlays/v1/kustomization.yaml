@@ -9,5 +9,7 @@ resources:
   - ../../base
 
 # Patches
-patchesStrategicMerge:
-  - patch.yaml
+images:
+  - name: REPLACED_BY_OVERLAY
+    newName: <YOUR_ECR_REPO>
+    newTag: v1

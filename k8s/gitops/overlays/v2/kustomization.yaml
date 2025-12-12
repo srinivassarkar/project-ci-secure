@@ -7,5 +7,7 @@ namespace: color-palette
 resources:
   - ../../base
 
-patchesStrategicMerge:
-  - patch.yaml
+images:
+  - name: REPLACED_BY_OVERLAY
+    newName: <YOUR_ECR_REPO>
+    newTag: v2
