@@ -103,21 +103,6 @@ module "eks" {
   enable_irsa = true
 }
 
-resource "helm_release" "argocd" {
-  name             = "argocd"
-  namespace        = "argocd"
-  create_namespace = true
-
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  version    = "6.7.10"
-
-  values = [
-    file("${path.module}/argocd-values.yaml")
-  ]
-}
-
-
 # ECR Repository (encrypted + lifecycle)
 resource "aws_ecr_repository" "app" {
   name                 = "${var.cluster_name}"
@@ -226,3 +211,4 @@ resource "aws_iam_role_policy" "eks_deploy" {
     ]
   })
 }
+

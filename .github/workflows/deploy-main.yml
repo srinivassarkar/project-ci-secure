@@ -32,18 +32,15 @@ jobs:
       - name: ECR Login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker Image
+      - name: Build & Push Image
         working-directory: app/service
         run: |
-          docker build -t $ECR_REPO:latest .
+          IMAGE_TAG=${{ github.sha }}
+          ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}
 
-      - name: Tag Image
-        run: |
-          docker tag $ECR_REPO:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPO:latest
+          docker build -t ${ECR_URI}:${IMAGE_TAG} .
+          docker push ${ECR_URI}:${IMAGE_TAG}
 
-      - name: Push Image
-        run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPO:latest
 
       # ---------- Deploy to EKS ----------
       - name: Update Kubeconfig
@@ -53,13 +50,19 @@ jobs:
       # - name: Deploy Manifests
       #   run: |
       #     kubectl apply -f k8s/
-      - name: Update overlay image
+      - name: Update GitOps overlay
         run: |
-          ECR_URI=123456789012.dkr.ecr.us-east-1.amazonaws.com/eks-ci-secure
-          sed -i "s#<YOUR_ECR_REPO>#${ECR_URI}#g" k8s/gitops/overlays/v1/patch.yaml
-          sed -i "s#v1#${{ github.sha }}#g" k8s/gitops/overlays/v1/patch.yaml
-          git add k8s/gitops/overlays/v1/patch.yaml
-          git commit -m "Update image to ${{ github.sha }}"
+          IMAGE_TAG=${{ github.sha }}
+          ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}
+
+          sed -i "s|image: .*|image: ${ECR_URI}:${IMAGE_TAG}|" k8s/gitops/overlays/v1/kustomization.yaml
+
+          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+
+          git add k8s/gitops/overlays/v1/kustomization.yaml
+          git commit -m "deploy: ${IMAGE_TAG}"
           git push
+
 
 

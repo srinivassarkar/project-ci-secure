@@ -4,3 +4,7 @@ server:
 controller:
   extraArgs:
     - --loglevel=info
+  configs:
+  params:
+    server.insecure: true
+
