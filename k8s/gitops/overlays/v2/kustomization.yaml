@@ -8,6 +8,6 @@ resources:
   - ../../base
 
 images:
-  - name: REPLACED_BY_OVERLAY
-    newName: <YOUR_ECR_REPO>
+  - name: color-palette
+    newName: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/eks-ci-secure
     newTag: v2

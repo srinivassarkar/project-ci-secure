@@ -10,6 +10,3 @@ resources:
   - hpa.yaml
   - configmap.yaml
 
-images:
-  - name: REPLACED_BY_KUSTOMIZE
-    newName: REPLACED_BY_OVERLAY

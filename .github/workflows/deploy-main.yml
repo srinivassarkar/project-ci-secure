@@ -53,9 +53,8 @@ jobs:
       - name: Update GitOps overlay
         run: |
           IMAGE_TAG=${{ github.sha }}
-          ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}
 
-          sed -i "s|image: .*|image: ${ECR_URI}:${IMAGE_TAG}|" k8s/gitops/overlays/v1/kustomization.yaml
+          sed -i "s/newTag: .*/newTag: ${IMAGE_TAG}/" k8s/gitops/overlays/v1/kustomization.yaml
 
           git config user.email "actions@github.com"
           git config user.name "github-actions"
@@ -63,6 +62,7 @@ jobs:
           git add k8s/gitops/overlays/v1/kustomization.yaml
           git commit -m "deploy: ${IMAGE_TAG}"
           git push
+
 
 
 
