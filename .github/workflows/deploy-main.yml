@@ -1,8 +1,7 @@
 name: Build & Deploy
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:  
 
 permissions:
   id-token: write
@@ -36,33 +35,28 @@ jobs:
         working-directory: app/service
         run: |
           IMAGE_TAG=${{ github.sha }}
-          ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}
+          ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
 
           docker build -t ${ECR_URI}:${IMAGE_TAG} .
           docker push ${ECR_URI}:${IMAGE_TAG}
-
 
       # ---------- Deploy to EKS ----------
       - name: Update Kubeconfig
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      # - name: Deploy Manifests
-      #   run: |
-      #     kubectl apply -f k8s/
       - name: Update GitOps overlay
         run: |
-          IMAGE_TAG=${{ github.sha }}
-
-          sed -i "s/newTag: .*/newTag: ${IMAGE_TAG}/" k8s/gitops/overlays/v1/kustomization.yaml
-
+          sed -i "s/newTag: .*/newTag: ${{ github.sha }}/" k8s/gitops/overlays/v1/kustomization.yaml
+          
           git config user.email "actions@github.com"
           git config user.name "github-actions"
 
           git add k8s/gitops/overlays/v1/kustomization.yaml
-          git commit -m "deploy: ${IMAGE_TAG}"
-          git push
-
-
-
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "deploy: ${{ github.sha }}"
+            git push
+          fi
 
