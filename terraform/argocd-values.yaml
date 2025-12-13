@@ -6,5 +6,6 @@ controller:
     - --loglevel=info
   configs:
   params:
+    # Disabled TLS for demo simplicity; not for production
     server.insecure: true
 
